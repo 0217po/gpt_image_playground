@@ -1,0 +1,8 @@
+# 容器内脚本/配置必须保持 LF 换行，否则 Docker 构建（Windows 上的 core.autocrlf=true）
+# 会生成带 CRLF 的脚本，导致容器启动时 /bin/sh 报错并反复重启。
+deploy/*.sh text eol=lf
+deploy/*.envsh text eol=lf
+deploy/nginx.conf text eol=lf
+deploy/Dockerfile text eol=lf
+Dockerfile text eol=lf
+*.sh text eol=lf

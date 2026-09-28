@@ -1,0 +1,23 @@
+# 本地自建部署（从源码构建）
+#
+# 重新部署：docker compose -f deploy/docker-compose.yml up -d --build
+# 查看日志：docker compose -f deploy/docker-compose.yml logs -f
+# 停止：    docker compose -f deploy/docker-compose.yml down
+services:
+  gpt-image-playground:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: gpt-image-playground:latest
+    container_name: gpt-image-playground
+    ports:
+      - "8081:80"
+    environment:
+      # 前端默认 API 地址：/api/proxy 表示走容器内 Nginx 反代（隐藏真实上游地址）
+      - DEFAULT_API_URL=/api/proxy
+      # 开启 Nginx 同源代理，请求 /api-proxy/{路径} 转发到下面的上游地址
+      - ENABLE_API_PROXY=true
+      - API_PROXY_URL=https://sekirocloud.shop
+      # 其余开关（LOCK_API_PROXY / SHOW_PRESET_CONFIG_ONLY 等）默认 false，
+      # 已由镜像 ENV 提供，无需在此重复声明。
+    restart: unless-stopped

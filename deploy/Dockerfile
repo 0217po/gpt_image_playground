@@ -36,6 +36,15 @@ COPY deploy/nginx.conf /etc/nginx/templates/default.conf.template
 COPY --chmod=755 deploy/migrate-api-env.envsh /docker-entrypoint.d/05-migrate-api-env.envsh
 COPY --chmod=755 deploy/inject-api-url.sh /docker-entrypoint.d/40-inject-api-url.sh
 
+# 防御性处理：在 Windows 上以 core.autocrlf=true 检出时构建上下文会带上 CRLF，
+# 导致 /bin/sh 无法执行入口脚本（容器反复重启，退出码 127）。此处统一转为 LF。
+RUN tr -d '\r' < /docker-entrypoint.d/05-migrate-api-env.envsh > /tmp/a \
+    && mv /tmp/a /docker-entrypoint.d/05-migrate-api-env.envsh \
+    && chmod 755 /docker-entrypoint.d/05-migrate-api-env.envsh \
+    && tr -d '\r' < /docker-entrypoint.d/40-inject-api-url.sh > /tmp/b \
+    && mv /tmp/b /docker-entrypoint.d/40-inject-api-url.sh \
+    && chmod 755 /docker-entrypoint.d/40-inject-api-url.sh
+
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
